@@ -26,7 +26,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   bool _isListening = false;
@@ -55,10 +55,71 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _isSearching = false;
 
+  // Animation Controllers
+  late AnimationController _logoAnimController;
+  late AnimationController _statsAnimController;
+  late AnimationController _searchGlowController;
+  late Animation<double> _logoPulseAnimation;
+  late Animation<double> _searchGlowAnimation;
+  
+  // Count-up values
+  int _animatedMedicineCount = 0;
+  int _animatedGenericCount = 0;
+  int _animatedVerifiedPercent = 0;
+
   @override
   void initState() {
     super.initState();
     _loadRecentSearches();
+    _initAnimations();
+  }
+
+  void _initAnimations() {
+    // Logo Pulse Animation
+    _logoAnimController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _logoPulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+      CurvedAnimation(parent: _logoAnimController, curve: Curves.easeInOut),
+    );
+    
+    // Stats Count-up Animation
+    _statsAnimController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    
+    _statsAnimController.addListener(() {
+      setState(() {
+        _animatedMedicineCount = (21591 * _statsAnimController.value).round();
+        _animatedGenericCount = (1661 * _statsAnimController.value).round();
+        _animatedVerifiedPercent = (99.7 * _statsAnimController.value).round();
+      });
+    });
+    
+    _statsAnimController.forward();
+    
+    // Search Bar Glow Animation
+    _searchGlowController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _searchGlowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
+      CurvedAnimation(parent: _searchGlowController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _logoAnimController.dispose();
+    _statsAnimController.dispose();
+    _searchGlowController.dispose();
+    _searchController.dispose();
+    _searchFocus.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRecentSearches() async {
@@ -376,8 +437,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: Row(
                             children: [
-                              ClipOval(
-                                child: Image.asset('assets/logo.jpg', height: 50, width: 50, fit: BoxFit.cover),
+                              ScaleTransition(
+                                scale: _logoPulseAnimation,
+                                child: ClipOval(
+                                  child: Image.asset('assets/logo.jpg', height: 50, width: 50, fit: BoxFit.cover),
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Flexible(
@@ -534,11 +598,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatItem('21,591', 'Medicines'),
+                      _buildStatItem(_formatNumber(_animatedMedicineCount), 'Medicines'),
                       Container(height: 30, width: 1, color: AppColors.border),
-                      _buildStatItem('1,661', 'Generics'),
+                      _buildStatItem(_formatNumber(_animatedGenericCount), 'Generics'),
                       Container(height: 30, width: 1, color: AppColors.border),
-                      _buildStatItem('99.7%', 'Verified'),
+                      _buildStatItem('$_animatedVerifiedPercent%', 'Verified'),
                     ],
                   ),
                 ),
@@ -1070,5 +1134,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
     );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k'.replaceAll('.0k', 'k');
+    }
+    return number.toString();
   }
 }

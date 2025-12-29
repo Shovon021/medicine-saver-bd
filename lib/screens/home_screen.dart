@@ -14,6 +14,8 @@ import 'reminder_screen.dart';
 import 'pharmacy_locator_screen.dart';
 import 'health_tips_screen.dart';
 import 'theme_settings_screen.dart';
+import 'about_screen.dart';
+import 'developer_screen.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import '../services/database_helper.dart';
@@ -471,110 +473,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           icon: const Icon(Icons.health_and_safety_outlined),
                           tooltip: 'Drug Interaction Checker',
                         ),
-                        // Health Tips Button
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HealthTipsScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.lightbulb_outline),
-                          tooltip: 'Health Tips',
-                        ),
-                        // Theme Settings Button
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ThemeSettingsScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.palette_outlined),
-                          tooltip: 'Theme',
-                        ),
-                        // Profile / Login Button
-                        ListenableBuilder(
-                          listenable: AuthService.instance,
-                          builder: (context, _) {
-                            final user = AuthService.instance.currentUser;
-                            return IconButton(
-                              onPressed: () {
-                                if (user == null) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                  );
-                                } else {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    builder: (context) => Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ListTile(
-                                          leading: CircleAvatar(child: Text(user.name[0])),
-                                          title: Text(user.name),
-                                          subtitle: Text(user.email),
-                                        ),
-                                        const Divider(),
-                                        ListTile(
-                                          leading: const Icon(Icons.info_outline),
-                                          title: const Text('About Developer'),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            showAboutDialog(
-                                              context: context,
-                                              applicationName: 'Medicine Saver BD',
-                                              applicationVersion: '1.0.0',
-                                              applicationIcon: const Icon(Icons.medical_services, size: 40),
-                                              children: [
-                                                  const SizedBox(height: 16),
-                                                  const Text(
-                                                    'Developed by:\n\nSarfaraz Ahamed Shovon',
-                                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                  const SizedBox(height: 16),
-                                                  const Text(
-                                                    'Helping Bangladesh find affordable medicines.',
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                        ListTile(
-                                          leading: const Icon(Icons.logout, color: Colors.red),
-                                          title: const Text('Logout', style: TextStyle(color: Colors.red)),
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                            AuthService.instance.signOut();
-                                          },
-                                        ),
-                                        const SizedBox(height: 20),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: user == null
-                                  ? const Icon(Icons.account_circle_outlined)
-                                  : CircleAvatar(
-                                      radius: 14,
-                                      backgroundColor: AppColors.primaryAccent,
-                                      child: Text(
-                                        user.name[0],
-                                        style: const TextStyle(
-                                            fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                              tooltip: user == null ? 'Login' : 'Profile',
-                            );
-                          },
+                        // 3-Dot Menu
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert),
+                          tooltip: 'More options',
+                          onSelected: (value) => _handleMenuAction(context, value),
+                          itemBuilder: (context) => [
+                            _buildMenuItem('profile', Icons.person_outline, 'Profile'),
+                            _buildMenuItem('theme', Icons.palette_outlined, 'Theme'),
+                            _buildMenuItem('tips', Icons.lightbulb_outline, 'Health Tips'),
+                            _buildMenuItem('reminders', Icons.notifications_outlined, 'Reminders'),
+                            const PopupMenuDivider(),
+                            _buildMenuItem('about', Icons.info_outline, 'About'),
+                            _buildMenuItem('developer', Icons.code, 'Developer'),
+                            _buildMenuItem('rate', Icons.star_outline, 'Rate App'),
+                            _buildMenuItem('share', Icons.share_outlined, 'Share App'),
+                          ],
                         ),
                       ],
                     ),
@@ -1155,5 +1069,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return '${(number / 1000).toStringAsFixed(1)}k'.replaceAll('.0k', 'k');
     }
     return number.toString();
+  }
+
+  PopupMenuItem<String> _buildMenuItem(String value, IconData icon, String title) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.textBody),
+          const SizedBox(width: 12),
+          Text(title),
+        ],
+      ),
+    );
+  }
+
+  void _handleMenuAction(BuildContext context, String value) {
+    switch (value) {
+      case 'profile':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+        break;
+      case 'theme':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const ThemeSettingsScreen()));
+        break;
+      case 'tips':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const HealthTipsScreen()));
+        break;
+      case 'reminders':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const ReminderScreen()));
+        break;
+      case 'about':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+        break;
+      case 'developer':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const DeveloperScreen()));
+        break;
+      case 'rate':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Coming soon! App not yet on Play Store')),
+        );
+        break;
+      case 'share':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Share feature coming soon!')),
+        );
+        break;
+    }
   }
 }

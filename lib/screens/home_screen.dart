@@ -415,13 +415,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // _showScanBottomSheet and related methods
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocus.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(

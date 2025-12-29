@@ -62,7 +62,7 @@ class _PharmacyLocatorScreenState extends State<PharmacyLocatorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Find Pharmacy'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryAccent,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(

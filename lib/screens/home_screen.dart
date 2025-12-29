@@ -379,9 +379,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Text(
-                                  'Medicine Saver',
+                                  'MedSaver BD',
                                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                    fontSize: 26,
+                                    fontSize: 22,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -549,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: _buildQuickAction(
                         icon: Icons.medication_liquid_outlined,
-                        label: 'My Cabinet',
+                        label: 'Cabinet',
                         onTap: () {
                           Navigator.push(
                             context,

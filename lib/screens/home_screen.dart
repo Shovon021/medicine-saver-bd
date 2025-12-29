@@ -499,13 +499,46 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 4),
+                    // Better Tagline
                     Text(
-                      'Find affordable alternatives instantly',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      'Compare prices. Find generics. Save money 💊',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textSubtle,
                           ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            
+            // Stats Banner
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryAccent.withValues(alpha: 0.1),
+                        AppColors.success.withValues(alpha: 0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primaryAccent.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem('21,591', 'Medicines'),
+                      Container(height: 30, width: 1, color: AppColors.border),
+                      _buildStatItem('1,661', 'Generics'),
+                      Container(height: 30, width: 1, color: AppColors.border),
+                      _buildStatItem('99.7%', 'Verified'),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -903,6 +936,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: AppColors.textSubtle.withValues(alpha: 0.7),
                             ),
                       ),
+                      // Popular Searches
+                      const SizedBox(height: 24),
+                      Text(
+                        'Popular Searches',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.textHeading,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        alignment: WrapAlignment.center,
+                        children: ['Napa', 'Seclo', 'Paracetamol', 'Ace', 'Omeprazole'].map((query) => ActionChip(
+                          label: Text(query),
+                          onPressed: () {
+                            _searchController.text = query;
+                            _onSearch(query);
+                          },
+                          avatar: const Icon(Icons.trending_up, size: 16, color: AppColors.primaryAccent),
+                          backgroundColor: AppColors.primaryAccent.withValues(alpha: 0.1),
+                        )).toList(),
+                      ),
                       // Recent Searches (#5)
                       if (_recentSearches.isNotEmpty) ...[
                         const SizedBox(height: 24),
@@ -986,6 +1043,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryAccent,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.textSubtle,
+          ),
+        ),
+      ],
     );
   }
 }

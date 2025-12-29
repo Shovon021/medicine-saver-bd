@@ -12,32 +12,39 @@
 ## 🎯 Features
 
 ### Core
-- 🔍 **Smart Search** – Fuzzy search with Bangla transliteration support
-- 💰 **Savings Calculator** – See how much you can save on alternatives
-- 📊 **Price Comparison** – Compare branded vs generic medicine prices
+- 🔍 **Smart Search** – Fuzzy search by Brand or Generic name with strength filtering
+- 💰 **Savings Calculator** – See how much you can save (up to X%) on alternatives
+- 📊 **Price Comparison** – Compare branded vs generic medicine prices sorted by cost
+- ⭐ **Recent Searches** – Quick access to your last 5 searches
 
 ### Advanced
 - 🎙️ **Voice Search** – Search medicines using voice commands
 - 📷 **Prescription Scanner (OCR)** – Scan prescriptions to find medicines
 - ⚠️ **Drug Interaction Checker** – Check for dangerous drug combinations
+- ✅ **Trusted Manufacturer Badges** – Verified badges for major BD pharma (Square, Beximco, Renata, etc.)
 
 ### User Utility
-- 📁 **My Cabinet** – Bookmark frequently used medicines
+- 📁 **My Cabinet** – Bookmark frequently used medicines with Add-to-Cabinet button
 - ⏰ **Medicine Reminders** – Never miss a dose with notifications
 - 🏥 **Pharmacy Locator** – Find nearby pharmacies using GPS
-
-### Extras
 - 💡 **Health Tips** – Daily health and medicine safety tips
+
+### UI/UX Polish
+- ✨ **Loading Shimmer** – Premium skeleton loading instead of spinners
+- 🎨 **Modern Clinical Theme** – Teal/Navy medical-grade design
 - 🌙 **Dark Mode** – Automatic dark theme support
-- 📴 **Offline-First** – Works without internet using local database
+- 📴 **Offline-First** – Works without internet using local SQLite database
 
 ---
 
-## 📱 Screenshots
+## 📊 Database Stats
 
-| Home | Details | Interactions |
-|:----:|:-------:|:------------:|
-| Search & Quick Actions | Medicine Details | Drug Checker |
+| Metric | Value |
+|--------|-------|
+| **Total Medicines** | 21,712 |
+| **Generic Compounds** | 1,661 |
+| **Manufacturers** | 232 |
+| **Price Coverage** | 100% |
 
 ---
 
@@ -57,15 +64,14 @@ cd medicine-saver-bd
 # Install Flutter dependencies
 flutter pub get
 
-# Generate sample database
-cd data_pipeline
-pip install -r requirements.txt
-python generate_sample.py --count 500
-python build_db.py --copy-to-flutter
-cd ..
-
 # Run the app
 flutter run
+```
+
+### Build APK
+```bash
+flutter build apk --release
+# Output: build/app/outputs/flutter-apk/app-release.apk
 ```
 
 ---
@@ -74,14 +80,14 @@ flutter run
 
 ```
 medicine/
-├── lib/                    # Flutter app code
-│   ├── config/            # Theme & config
-│   ├── models/            # Data models
-│   ├── screens/           # UI screens (7 screens)
-│   ├── services/          # Business logic (8 services)
-│   └── widgets/           # Reusable components
-├── assets/db/             # SQLite database
-└── data_pipeline/         # Python scrapers
+├── lib/
+│   ├── config/theme.dart       # Modern Clinical theme system
+│   ├── models/                 # Brand, Generic, Manufacturer models
+│   ├── screens/                # 7 screens (Home, Details, Cabinet, etc.)
+│   ├── services/               # 10 services (Database, Voice, OCR, etc.)
+│   └── widgets/                # Reusable components (MedicineCard, Shimmer)
+├── assets/db/medicines.db      # SQLite database (3.97 MB)
+└── data_pipeline/              # Python scrapers & data tools
 ```
 
 ---
@@ -91,15 +97,17 @@ medicine/
 The app uses a multi-source data pipeline for accurate medicine data:
 
 ```
-Medex.com.bd ──┐
-               ├──→ Cross-Verify ──→ SQLite DB
-DGDA/Kaggle ───┘
+Kaggle Dataset ──┐
+                 ├──→ Cross-Verify ──→ SQLite DB
+Medex/DGDA ──────┘
 ```
 
-| Source | Data Type |
-|--------|-----------|
-| Medex | Medical info, prices |
-| DGDA | Official MRP (Government) |
+| Script | Purpose |
+|--------|---------|
+| `load_new_prices.py` | Import external price CSV |
+| `normalize_prices.py` | Normalize to realistic BD Taka ranges |
+| `cross_verify.py` | Compare sources, assign confidence |
+| `build_db.py` | Compile final SQLite database |
 
 ---
 
@@ -107,13 +115,30 @@ DGDA/Kaggle ───┘
 
 | Category | Technology |
 |----------|------------|
-| Framework | Flutter 3.x |
-| Database | SQLite (sqflite) |
-| Voice | speech_to_text |
-| OCR | Google ML Kit |
-| Notifications | flutter_local_notifications |
-| Location | Geolocator + Google Maps |
-| Scraping | Python + BeautifulSoup |
+| **Framework** | Flutter 3.x |
+| **Database** | SQLite (sqflite) |
+| **Voice** | speech_to_text |
+| **OCR** | Google ML Kit |
+| **Notifications** | flutter_local_notifications |
+| **Location** | Geolocator + Google Maps |
+| **Animations** | flutter_staggered_animations, shimmer |
+
+---
+
+## 📱 Screenshots
+
+| Home | Search Results | Empty State |
+|:----:|:--------------:|:-----------:|
+| Search & Quick Actions | Alternatives with Savings % | No Results Illustration |
+
+---
+
+## 🔮 Future Roadmap
+
+- [ ] Barcode Scanner for medicine lookup
+- [ ] Price Alerts when medicine costs drop
+- [ ] User Reviews for pharmacies
+- [ ] Cloud sync for user data
 
 ---
 
@@ -123,11 +148,10 @@ MIT License – See [LICENSE](LICENSE) for details.
 
 ---
 
-## 🙏 Acknowledgments
+## 👨‍💻 Author
 
-- Medicine data from [Medex.com.bd](https://medex.com.bd)
-- Price verification from [DGDA](https://dgda.gov.bd)
-- Icons by [Material Design](https://material.io/icons)
+**Sarfaraz Ahamed Shovon**
+- GitHub: [@Shovon021](https://github.com/Shovon021)
 
 ---
 

@@ -13,6 +13,7 @@ import 'cabinet_screen.dart';
 import 'reminder_screen.dart';
 import 'pharmacy_locator_screen.dart';
 import 'health_tips_screen.dart';
+import 'theme_settings_screen.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import '../services/database_helper.dart';
@@ -482,6 +483,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           },
                           icon: const Icon(Icons.lightbulb_outline),
                           tooltip: 'Health Tips',
+                        ),
+                        // Theme Settings Button
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ThemeSettingsScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.palette_outlined),
+                          tooltip: 'Theme',
                         ),
                         // Profile / Login Button
                         ListenableBuilder(

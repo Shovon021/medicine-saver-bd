@@ -51,7 +51,7 @@ class DeveloperScreen extends StatelessWidget {
             
             // Developer Name
             Text(
-              'Shovon',
+              'Sarfaraz Ahamed Shovon',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.textHeading,
@@ -71,8 +71,16 @@ class DeveloperScreen extends StatelessWidget {
               context,
               icon: Icons.email_outlined,
               title: 'Email',
-              subtitle: 'shovon@example.com',
-              onTap: () => _launchUrl('mailto:shovon@example.com'),
+              subtitle: 'sarfaraz.sovon@gmail.com',
+              onTap: () => _launchUrl('mailto:sarfaraz.sovon@gmail.com'),
+            ),
+            const SizedBox(height: 12),
+            _buildContactCard(
+              context,
+              icon: Icons.facebook,
+              title: 'Facebook',
+              subtitle: 'facebook.com/sarfaraz.shovon',
+              onTap: () => _launchUrl('https://www.facebook.com/share/1Jp7V63tgf/'),
             ),
             const SizedBox(height: 12),
             _buildContactCard(
@@ -81,14 +89,6 @@ class DeveloperScreen extends StatelessWidget {
               title: 'GitHub',
               subtitle: 'github.com/Shovon021',
               onTap: () => _launchUrl('https://github.com/Shovon021'),
-            ),
-            const SizedBox(height: 12),
-            _buildContactCard(
-              context,
-              icon: Icons.language,
-              title: 'LinkedIn',
-              subtitle: 'linkedin.com/in/shovon',
-              onTap: () => _launchUrl('https://linkedin.com'),
             ),
             const SizedBox(height: 32),
             

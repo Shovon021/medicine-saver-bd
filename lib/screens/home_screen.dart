@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
@@ -379,11 +380,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Text(
-                                  'MedSaver BD',
-                                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                    fontSize: 22,
+                                  'MedSaver',
+                                  style: GoogleFonts.playball(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.primaryAccent,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],

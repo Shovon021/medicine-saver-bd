@@ -10,6 +10,7 @@ class Brand {
   final String? dosageForm;
   final double? price;
   final String? packSize;
+  final bool verified; // True = real price, False = estimated
 
   Brand({
     required this.id,
@@ -22,6 +23,7 @@ class Brand {
     this.dosageForm,
     this.price,
     this.packSize,
+    this.verified = false,
   });
 
   factory Brand.fromMap(Map<String, dynamic> map) {
@@ -36,6 +38,7 @@ class Brand {
       dosageForm: map['dosage_form'] as String?,
       price: (map['price'] as num?)?.toDouble(),
       packSize: map['pack_size'] as String?,
+      verified: (map['verified'] as int?) == 1,
     );
   }
 

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/shimmer_loading.dart';
-// import '../services/voice_search_service.dart'; // DISABLED
+import '../services/voice_search_service.dart'; // RE-ENABLED with native Android intent
 // import '../services/prescription_scanner_service.dart'; // DISABLED
 import 'interaction_checker_screen.dart';
 import 'cabinet_screen.dart';
@@ -193,11 +193,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _startVoiceSearch() async {
-    // FEATURE DISABLED: Voice search removed for APK build compatibility
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Voice search feature is currently disabled')),
-      );
+    // Voice search using Android's built-in speech recognition
+    setState(() => _isListening = true);
+    
+    try {
+      final result = await VoiceSearchService.instance.startListening();
+      
+      if (result != null && result.isNotEmpty && mounted) {
+        final query = VoiceSearchService.extractSearchQuery(result);
+        _searchController.text = query;
+        _onSearch(query);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No speech detected. Try again.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Voice error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isListening = false);
     }
   }
 
@@ -781,6 +799,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         price: brand.price ?? 0.0,
                                         packSize: brand.packSize,
                                         isCheapest: isCheapest,
+                                        isVerified: brand.verified,
                                         onAddToCabinet: () => _addToCabinet(brand),
                                       ),
                                     ),

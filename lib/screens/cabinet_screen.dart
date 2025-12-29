@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import '../services/security_service.dart'; // DISABLED for APK build
+import '../services/security_service.dart'; // RE-ENABLED with PIN-based security
 import '../services/backup_service.dart';
 import '../services/cabinet_service.dart';
 import '../config/theme.dart';
@@ -25,10 +25,63 @@ class _CabinetScreenState extends State<CabinetScreen> {
   }
 
   Future<void> _checkSecurity() async {
-    // DISABLED: Security/biometric authentication removed for APK build
-    // Skip authentication and load medicines directly
-    setState(() => _isLocked = false);
-    _loadMedicines();
+    // Check if PIN is enabled
+    final pinEnabled = await SecurityService.instance.isPinEnabled();
+    
+    if (!pinEnabled) {
+      // No PIN set, allow access directly
+      setState(() => _isLocked = false);
+      _loadMedicines();
+      return;
+    }
+    
+    // Show PIN dialog
+    if (mounted) {
+      final verified = await _showPinDialog();
+      if (verified) {
+        setState(() => _isLocked = false);
+        _loadMedicines();
+      } else if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<bool> _showPinDialog() async {
+    final pinController = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter PIN'),
+        content: TextField(
+          controller: pinController,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          maxLength: 4,
+          decoration: const InputDecoration(
+            hintText: '4-digit PIN',
+            counterText: '',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final verified = await SecurityService.instance.verifyPin(pinController.text);
+              if (context.mounted) Navigator.pop(context, verified);
+            },
+            child: const Text('Unlock'),
+          ),
+        ],
+      ),
+    );
+    pinController.dispose();
+    return result ?? false;
   }
 
   Future<void> _loadMedicines() async {

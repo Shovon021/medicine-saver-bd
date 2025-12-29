@@ -13,6 +13,7 @@ class MedicineCard extends StatelessWidget {
   final double price;
   final String? packSize;
   final bool isCheapest;
+  final bool isVerified; // True = real price, False = estimated price
   final VoidCallback? onAddToCabinet;
   
   // Trusted manufacturers in Bangladesh (#6)
@@ -32,6 +33,7 @@ class MedicineCard extends StatelessWidget {
     required this.price,
     this.packSize,
     this.isCheapest = false,
+    this.isVerified = false,
     this.onAddToCabinet,
   });
   
@@ -200,7 +202,6 @@ class MedicineCard extends StatelessWidget {
                           ),
                     ),
                     const SizedBox(height: 2),
-                    // Unit Price Display (#8)
                     Text(
                       packSize != null && packSize!.isNotEmpty
                           ? 'Pack: $packSize'
@@ -209,6 +210,36 @@ class MedicineCard extends StatelessWidget {
                             fontSize: 11,
                             color: AppColors.textSubtle,
                           ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Price Verification Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isVerified 
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isVerified ? Icons.verified : Icons.warning_amber_rounded,
+                            size: 10,
+                            color: isVerified ? AppColors.success : Colors.orange,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            isVerified ? 'Verified' : 'Est.',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: isVerified ? AppColors.success : Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

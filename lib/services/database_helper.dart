@@ -117,7 +117,7 @@ class DatabaseHelper {
     final List<Map<String, dynamic>> results = await db.rawQuery('''
       SELECT 
         b.id, b.name, b.generic_id, b.manufacturer_id, b.strength, 
-        b.dosage_form, b.price, b.pack_size,
+        b.dosage_form, b.price, b.pack_size, b.verified,
         g.name as generic_name,
         m.name as manufacturer_name
       FROM brands b
@@ -138,7 +138,7 @@ class DatabaseHelper {
     final List<Map<String, dynamic>> results = await db.rawQuery('''
       SELECT 
         b.id, b.name, b.generic_id, b.manufacturer_id, b.strength, 
-        b.dosage_form, b.price, b.pack_size,
+        b.dosage_form, b.price, b.pack_size, b.verified,
         g.name as generic_name,
         m.name as manufacturer_name
       FROM brands b

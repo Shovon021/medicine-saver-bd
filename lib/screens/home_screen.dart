@@ -5,8 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/theme.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/shimmer_loading.dart';
-import '../services/voice_search_service.dart';
-import '../services/prescription_scanner_service.dart';
+// import '../services/voice_search_service.dart'; // DISABLED
+// import '../services/prescription_scanner_service.dart'; // DISABLED
 import 'interaction_checker_screen.dart';
 import 'cabinet_screen.dart';
 import 'reminder_screen.dart';
@@ -193,29 +193,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _startVoiceSearch() async {
-    final voiceService = VoiceSearchService.instance;
-    
-    if (!await voiceService.isAvailable) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Voice search not available on this device')),
-        );
-      }
-      return;
+    // FEATURE DISABLED: Voice search removed for APK build compatibility
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Voice search feature is currently disabled')),
+      );
     }
-
-    setState(() => _isListening = true);
-
-    await voiceService.startListening(
-      onResult: (text, isFinal) {
-        if (isFinal) {
-          final query = VoiceSearchService.extractSearchQuery(text);
-          _searchController.text = query;
-          _onSearch(query);
-          setState(() => _isListening = false);
-        }
-      },
-    );
   }
 
   Future<void> _scanPrescription() async {
@@ -253,8 +236,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Camera',
                     onTap: () async {
                       Navigator.pop(context);
-                      final result = await PrescriptionScannerService.instance.scanFromCamera();
-                      _handleScanResult(result);
+                      // DISABLED: Scanner feature removed
+                      // final result = await PrescriptionScannerService.instance.scanFromCamera();
+                      // _handleScanResult(result);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Scanner feature temporarily disabled')),
+                      );
                     },
                   ),
                 ),
@@ -265,8 +252,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     label: 'Gallery',
                     onTap: () async {
                       Navigator.pop(context);
-                      final result = await PrescriptionScannerService.instance.scanFromGallery();
-                      _handleScanResult(result);
+                      // DISABLED: Scanner feature removed
+                      // final result = await PrescriptionScannerService.instance.scanFromGallery();
+                      // _handleScanResult(result);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Scanner feature temporarily disabled')),
+                      );
                     },
                   ),
                 ),
@@ -305,70 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _handleScanResult(ScanResult result) {
-    if (!result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.error ?? 'Scan failed')),
-      );
-      return;
-    }
-
-    if (result.extractedMedicines.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No medicine names found in the image')),
-      );
-      return;
-    }
-
-    // Show extracted medicines
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.3,
-        maxChildSize: 0.8,
-        expand: false,
-        builder: (context, scrollController) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Medicines Found',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: result.extractedMedicines.length,
-                  itemBuilder: (context, index) {
-                    final medicine = result.extractedMedicines[index];
-                    return ListTile(
-                      leading: const Icon(Icons.medication_outlined),
-                      title: Text(medicine),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          _searchController.text = medicine;
-                          _onSearch(medicine);
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // _showScanBottomSheet and related methods
 
   @override
   void dispose() {

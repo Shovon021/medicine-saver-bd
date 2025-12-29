@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/security_service.dart';
+// import '../services/security_service.dart'; // DISABLED for APK build
 import '../services/backup_service.dart';
 import '../services/cabinet_service.dart';
 import '../config/theme.dart';
@@ -25,20 +25,10 @@ class _CabinetScreenState extends State<CabinetScreen> {
   }
 
   Future<void> _checkSecurity() async {
-    // Check if device is secure, otherwise prompt
-    final secure = await SecurityService.instance.authenticate();
-    if (secure) {
-      setState(() => _isLocked = false);
-      _loadMedicines();
-    } else {
-      // Failed to auth, maybe go back?
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Authentication required to access Cabinet')),
-        );
-        Navigator.pop(context);
-      }
-    }
+    // DISABLED: Security/biometric authentication removed for APK build
+    // Skip authentication and load medicines directly
+    setState(() => _isLocked = false);
+    _loadMedicines();
   }
 
   Future<void> _loadMedicines() async {

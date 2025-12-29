@@ -24,8 +24,8 @@ dependencies:
   dio: ^5.8.0
   connectivity_plus: ^6.1.4
   
-  # Secure Local Vault (Real Features)
-  local_auth: ^2.3.0              # Biometric Fingerprint/FaceID
+  # Core Features Only (Heavy features commented for APK build fix)
+  # local_auth: ^2.3.0              # Biometric - DISABLED for build
   share_plus: ^10.1.3             # Export Backup File
   file_picker: ^8.1.4             # Import Backup File
   flutter_secure_storage: ^9.2.2  # Secure PIN Storage
@@ -34,20 +34,20 @@ dependencies:
   flutter_staggered_animations: ^1.1.1 # List Animations
   font_awesome_flutter: ^10.7.0   # Medical Icons
   shimmer: ^3.0.0                 # Loading Effect
-  flutter_svg: ^2.0.10+1          # SVG Logo Support
+  # flutter_svg: ^2.0.10+1          # SVG Logo Support - Not needed
   
-  # Advanced Features
-  speech_to_text: ^7.0.0          # Voice Search
-  google_mlkit_text_recognition: ^0.14.0  # OCR for Prescription Scanner
-  image_picker: ^1.1.2            # Camera for OCR
+  # Advanced Features (Temporarily disabled for build)
+  # speech_to_text: ^7.0.0          # Voice Search - DISABLED
+  # google_mlkit_text_recognition: ^0.14.0  # OCR - DISABLED (causes build failure)
+  # image_picker: ^1.1.2            # Camera for OCR - DISABLED
   permission_handler: ^11.3.1     # Runtime permissions
   shared_preferences: ^2.3.5      # Local storage for My Cabinet
   flutter_local_notifications: ^18.0.1  # Medicine Reminders
-  timezone: ^0.10.0               # Timezone for scheduled notifications
+  # timezone: ^0.10.0               # Timezone - DISABLED
   
   # User Utility
   url_launcher: ^6.3.1            # Open external links (Google Maps)
-  geolocator: ^13.0.2             # GPS location for pharmacy finder
+  # geolocator: ^13.0.2             # GPS location - DISABLED for build
 
 dev_dependencies:
   flutter_test:

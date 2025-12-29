@@ -376,7 +376,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: Row(
                             children: [
-                              Image.asset('assets/logo.jpg', height: 40),
+                              ClipOval(
+                                child: Image.asset('assets/logo.jpg', height: 50, width: 50, fit: BoxFit.cover),
+                              ),
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Text(

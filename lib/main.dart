@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'config/theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +44,7 @@ class MedicineSaverApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system, // Follows system preference
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

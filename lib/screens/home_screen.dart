@@ -41,6 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> _availableStrengths = [];
   String? _selectedStrength;
   
+  // Category (Dosage Form) filter
+  List<String> _availableCategories = [];
+  String? _selectedCategory;
+  
   // Recent Searches (#5)
   List<String> _recentSearches = [];
   static const String _recentSearchesKey = 'recent_searches';
@@ -129,7 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _searchResults = results;
         _filteredResults = List.from(results); // Copy for sorting
         _availableStrengths = DatabaseHelper.getUniqueStrengths(results);
+        _availableCategories = _getUniqueCategories(results);
         _selectedStrength = null; // Reset filter
+        _selectedCategory = null; // Reset category filter
         _currentGenericName = genericName;
         _savingsPercent = savings;
         _isLoading = false;
@@ -153,13 +159,40 @@ class _HomeScreenState extends State<HomeScreen> {
   void _applyStrengthFilter(String? strength) {
     setState(() {
       _selectedStrength = strength;
-      if (strength == null) {
-        _filteredResults = List.from(_searchResults);
-      } else {
-        _filteredResults = _searchResults.where((b) => b.strength == strength).toList();
-      }
+      _applyFilters();
     });
+  }
+
+  void _applyCategoryFilter(String? category) {
+    setState(() {
+      _selectedCategory = category;
+      _applyFilters();
+    });
+  }
+
+  void _applyFilters() {
+    var results = List<Brand>.from(_searchResults);
+    
+    if (_selectedStrength != null) {
+      results = results.where((b) => b.strength == _selectedStrength).toList();
+    }
+    
+    if (_selectedCategory != null) {
+      results = results.where((b) => b.dosageForm == _selectedCategory).toList();
+    }
+    
+    _filteredResults = results;
     _applySorting();
+  }
+
+  List<String> _getUniqueCategories(List<Brand> brands) {
+    final categories = brands
+        .where((b) => b.dosageForm != null && b.dosageForm!.isNotEmpty)
+        .map((b) => b.dosageForm!)
+        .toSet()
+        .toList();
+    categories.sort();
+    return categories;
   }
 
   Future<void> _addToCabinet(Brand brand) async {
@@ -687,7 +720,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-              // Sort Options (#7)
+              // Category (Dosage Form) Filter Chips
+              if (_availableCategories.length > 1)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.medical_services_outlined, size: 16, color: AppColors.textSubtle),
+                          const SizedBox(width: 8),
+                          FilterChip(
+                            label: const Text('All Forms'),
+                            selected: _selectedCategory == null,
+                            onSelected: (_) => _applyCategoryFilter(null),
+                            selectedColor: AppColors.success.withValues(alpha: 0.2),
+                          ),
+                          const SizedBox(width: 8),
+                          ..._availableCategories.map((category) => Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: FilterChip(
+                              label: Text(category),
+                              selected: _selectedCategory == category,
+                              onSelected: (_) => _applyCategoryFilter(category),
+                              selectedColor: AppColors.success.withValues(alpha: 0.2),
+                            ),
+                          )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),

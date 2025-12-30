@@ -1,53 +1,45 @@
-# 💊 Medicine Saver BD
+# Medicine Saver BD
 
 > **Save money on medicines.** Find affordable generic alternatives for branded drugs in Bangladesh.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 [![Android](https://img.shields.io/badge/Android-Ready-3DDC84?style=for-the-badge&logo=android&logoColor=white)]()
-[![SQLite](https://img.shields.io/badge/SQLite-Offline--First-003B57?style=for-the-badge&logo=sqlite&logoColor=white)]()
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)]()
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)]()
 
 ---
 
-## 📖 About
+## [i] About
 
-**Medicine Saver BD** is a comprehensive mobile application designed to help Bangladeshi citizens find affordable medicine alternatives. With rising healthcare costs, this app empowers users to compare branded vs. generic medicine prices and potentially save significant amounts on their prescriptions.
+**Medicine Saver BD** is a production-ready mobile application designed to help Bangladeshi citizens find affordable medicine alternatives. With rising healthcare costs, this app empowers users to compare branded vs. generic medicine prices and save up to 70% on their prescriptions.
 
-### 💡 The Problem We Solve
+### [!] The Problem We Solve
 
-In Bangladesh, branded medicines often cost **2-5x more** than their generic equivalents, even though they contain the same active ingredients. Most people are unaware of affordable alternatives, leading to unnecessary healthcare expenses.
+In Bangladesh, branded medicines often cost **2-5x more** than their generic equivalents, even though they contain the same active ingredients. Most people are unaware of affordable alternatives.
 
-### ✨ Our Solution
+### [*] Our Solution
 
-Medicine Saver BD provides:
-- **Instant price comparisons** between branded and generic medicines
-- **Savings calculations** showing exactly how much you can save
-- **Trusted manufacturer verification** for popular pharmaceutical companies
-- **Offline functionality** – works without internet connection
+- Instant price comparisons between branded and generic medicines
+- Real-time savings calculations
+- Prescription scanning with OCR technology
+- Drug interaction safety checks using FDA data
+- Cloud sync for your medicine cabinet
 
 ---
 
-## 📥 Download
+## [+] Download
 
-### 🔗 Latest Release
+### Latest Release
 
-**[⬇️ Download APK (v1.0.0)](https://github.com/Shovon021/medicine-saver-bd/releases/latest)** – 53.3 MB
+**[Download APK v1.0](https://github.com/Shovon021/medicine-saver-bd/releases/latest)** 
 
-### 🛠️ Build from Source
+### Build from Source
 
 ```bash
-# Clone the repository
 git clone https://github.com/Shovon021/medicine-saver-bd.git
 cd medicine-saver-bd
-
-# Install dependencies
 flutter pub get
-
-# Run in debug mode
-flutter run
-
-# Build release APK
 flutter build apk --release
 ```
 
@@ -55,330 +47,197 @@ flutter build apk --release
 
 ---
 
-## 🎯 Features
+## [=] Features
 
-### 🔍 Smart Medicine Search
-| Feature | Description |
-|---------|-------------|
-| **Fuzzy Search** | Find medicines even with typos or partial names |
-| **Brand + Generic Search** | Search by brand name OR generic compound |
-| **Strength Filtering** | Filter results by dosage strength (mg, ml, etc.) |
-| **Recent Searches** | Quick access to your last 5 searches |
+### [1] Smart Medicine Search
+| Feature | Status |
+|---------|--------|
+| Fuzzy Search (typo-tolerant) | [x] |
+| Brand + Generic Search | [x] |
+| Bengali Language Support | [x] |
+| Voice Search (Native Android) | [x] |
+| Recent Searches History | [x] |
 
-### 💰 Savings & Price Comparison
-| Feature | Description |
-|---------|-------------|
-| **Savings Calculator** | See exact savings percentage vs. branded medicines |
-| **Price per Unit** | Compare unit prices across alternatives |
-| **Cheapest Alternative** | Instantly find the most affordable option |
-| **Price Difference Display** | Visual savings indicators on each medicine |
+### [2] Prescription Scanner (OCR)
+| Feature | Status |
+|---------|--------|
+| Camera Capture | [x] |
+| Text Recognition (ML Kit) | [x] |
+| Auto Medicine Detection | [x] |
+| Direct Search Integration | [x] |
 
-### 📦 Personal Medicine Cabinet
-| Feature | Description |
-|---------|-------------|
-| **Bookmark Medicines** | Save frequently used medicines for quick access |
-| **Cabinet Organization** | Access all bookmarked medicines in one place |
-| **Quick Actions** | One-tap access to medicine details |
+### [3] Drug Interaction Checker
+| Feature | Status |
+|---------|--------|
+| OpenFDA API Integration | [x] |
+| Real-time FDA Data | [x] |
+| Severity Classification | [x] |
+| Offline Fallback Database | [x] |
 
-### ⏰ Medicine Reminders
-| Feature | Description |
-|---------|-------------|
-| **Custom Reminders** | Set reminders for any medicine |
-| **Flexible Scheduling** | Daily, weekly, or custom intervals |
-| **Push Notifications** | Never miss a dose with local notifications |
-| **Reminder Management** | Edit, delete, and manage all reminders |
+### [4] Crowdsourced Price Reporting
+| Feature | Status |
+|---------|--------|
+| Submit Street Prices | [x] |
+| Average Price Calculation | [x] |
+| Pharmacy Location Tracking | [x] |
+| Community Verification | [x] |
 
-### ⚠️ Drug Interaction Checker
-| Feature | Description |
-|---------|-------------|
-| **Interaction Database** | Check for dangerous drug combinations |
-| **Severity Levels** | Critical, Major, and Minor interaction warnings |
-| **Safety Alerts** | Prominent warnings for potentially harmful combinations |
+### [5] Personal Medicine Cabinet
+| Feature | Status |
+|---------|--------|
+| Bookmark Medicines | [x] |
+| Cloud Sync (Supabase) | [x] |
+| Offline Support | [x] |
+| Export/Backup (JSON) | [x] |
 
-### 💡 Health Tips
-| Feature | Description |
-|---------|-------------|
-| **Daily Health Tips** | Curated health and medicine safety tips |
-| **Categories** | General health, medicine storage, dosage guidance |
-| **Actionable Advice** | Practical tips for everyday wellness |
+### [6] Medicine Reminders
+| Feature | Status |
+|---------|--------|
+| Custom Scheduling | [x] |
+| Push Notifications | [x] |
+| Weekly Repeat | [x] |
+| Persistent Storage | [x] |
 
-### 🎨 Modern UI/UX
-| Feature | Description |
-|---------|-------------|
-| **Modern Clinical Theme** | Professional Teal/Navy medical-grade design |
-| **Dark Mode** | Full dark theme support with enhanced contrast |
-| **Shimmer Loading** | Premium skeleton loading animations |
-| **Smooth Animations** | Staggered list animations and micro-interactions |
-| **Trusted Badges** | Verified badges for major BD pharmaceutical companies |
+### [7] Authentication
+| Feature | Status |
+|---------|--------|
+| Google Sign-In (OAuth) | [x] |
+| Guest Mode | [x] |
+| PIN Protection | [x] |
+| Secure Storage | [x] |
 
-### 📴 Offline-First Architecture
-| Feature | Description |
-|---------|-------------|
-| **Local SQLite Database** | Complete medicine database stored locally |
-| **No Internet Required** | All core features work without connectivity |
-| **Fast Performance** | Instant search results from local data |
+### [8] Database Updates
+| Feature | Status |
+|---------|--------|
+| Auto-Check on Startup | [x] |
+| Cloud Download (Supabase) | [x] |
+| Version Tracking | [x] |
+| Silent Update | [x] |
+
+### [9] Pharmacy Locator
+| Feature | Status |
+|---------|--------|
+| Google Maps Integration | [x] |
+| Search by City/Area | [x] |
+| Popular Pharmacy Chains | [x] |
+
+### [10] UI/UX
+| Feature | Status |
+|---------|--------|
+| Light + Dark Theme | [x] |
+| Glassmorphism Design | [x] |
+| Shimmer Loading | [x] |
+| Staggered Animations | [x] |
 
 ---
 
-## 📊 Database Statistics
+## [#] Database Statistics
 
 | Metric | Value |
 |--------|-------|
-| 💊 **Total Medicines** | 21,712+ |
-| 🧬 **Generic Compounds** | 1,661 |
-| 🏭 **Manufacturers** | 232 |
-| 💵 **Price Coverage** | 100% |
-| 📦 **Database Size** | 5.8 MB |
+| Total Medicines | 21,712+ |
+| Generic Compounds | 1,661 |
+| Manufacturers | 232 |
+| Price Coverage | 100% |
+| Database Size | 5.8 MB |
 
 ---
 
-## 🖼️ Screenshots
+## [~] Tech Stack
 
-| Home Screen | Search Results | Medicine Details |
-|:-----------:|:--------------:|:----------------:|
-| Smart search with quick actions | Alternatives with savings % | Complete medicine information |
+### Core
+| Technology | Purpose |
+|------------|---------|
+| Flutter 3.x | Cross-platform UI |
+| Dart 3.x | Programming language |
+| Supabase | Backend (Auth, DB, Storage) |
+| SQLite | Offline database |
 
-| My Cabinet | Reminders | Drug Interactions |
-|:----------:|:---------:|:-----------------:|
-| Bookmarked medicines | Never miss a dose | Safety warnings |
+### APIs
+| Service | Purpose |
+|---------|---------|
+| OpenFDA | Drug interaction data |
+| Google ML Kit | OCR text recognition |
+| Google Maps | Pharmacy locator |
+
+### Packages
+| Package | Purpose |
+|---------|---------|
+| `supabase_flutter` | Backend integration |
+| `google_mlkit_text_recognition` | OCR scanner |
+| `dio` | HTTP client |
+| `flutter_local_notifications` | Reminders |
+| `google_fonts` | Typography |
 
 ---
 
-## 🏗️ Project Architecture
+## [>] Project Structure
 
 ```
 medicine-saver-bd/
-├── 📁 lib/
-│   ├── 📁 config/
-│   │   └── theme.dart              # Modern Clinical theme system (Light + Dark)
-│   ├── 📁 models/
-│   │   ├── brand.dart              # Brand medicine model
-│   │   ├── generic.dart            # Generic compound model
-│   │   ├── manufacturer.dart       # Manufacturer model
-│   │   └── models.dart             # Barrel export
-│   ├── 📁 screens/
-│   │   ├── home_screen.dart        # Main search & navigation hub
-│   │   ├── details_screen.dart     # Medicine details & alternatives
-│   │   ├── cabinet_screen.dart     # Bookmarked medicines
-│   │   ├── reminder_screen.dart    # Medicine reminders management
-│   │   ├── interaction_checker_screen.dart  # Drug interaction checker
-│   │   ├── health_tips_screen.dart # Daily health tips
-│   │   ├── splash_screen.dart      # App launch screen
-│   │   ├── login_screen.dart       # PIN-based login
-│   │   ├── about_screen.dart       # App information
-│   │   ├── developer_screen.dart   # Developer credits
-│   │   ├── theme_settings_screen.dart  # Theme preferences
-│   │   └── pharmacy_locator_screen.dart # Nearby pharmacies (Coming Soon)
-│   ├── 📁 services/
-│   │   ├── database_helper.dart    # SQLite operations
-│   │   ├── fuzzy_search.dart       # Fuzzy string matching algorithm
-│   │   ├── cabinet_service.dart    # Bookmark management
-│   │   ├── reminder_service.dart   # Notification scheduling
-│   │   ├── drug_interaction_service.dart  # Interaction checking
-│   │   ├── health_tips_service.dart # Health tips content
-│   │   ├── theme_service.dart      # Theme persistence
-│   │   ├── auth_service.dart       # PIN authentication
-│   │   ├── security_service.dart   # Secure storage
-│   │   ├── backup_service.dart     # Data export/import
-│   │   ├── voice_search_service.dart   # Voice input (Coming Soon)
-│   │   └── prescription_scanner_service.dart  # OCR scanning (Coming Soon)
-│   ├── 📁 widgets/
-│   │   ├── medicine_card.dart      # Medicine list item widget
-│   │   ├── shimmer_loading.dart    # Loading skeleton animations
-│   │   └── animated_widgets.dart   # Reusable animation components
-│   └── main.dart                   # App entry point
-├── 📁 assets/
-│   ├── 📁 db/
-│   │   └── medicines.db            # Pre-populated SQLite database (5.8 MB)
-│   ├── icon.jpg                    # App launcher icon
-│   └── logo.jpg                    # App logo
-├── 📁 data_pipeline/               # Python data processing tools
-│   ├── scrape_medex.py             # Web scraper for Medex.com.bd
-│   ├── build_db.py                 # SQLite database builder
-│   ├── cross_verify.py             # Price verification tool
-│   ├── validate.py                 # Data validation scripts
-│   └── ...                         # Additional data tools
-├── 📁 android/                     # Android platform configuration
-├── pubspec.yaml                    # Flutter dependencies
-└── README.md                       # This file
+|-- lib/
+|   |-- config/          # Theme system
+|   |-- models/          # Data models (Brand, Generic, PriceReport)
+|   |-- screens/         # 14 screens
+|   |-- services/        # 15 services
+|   |-- widgets/         # Reusable components
+|   |-- main.dart
+|-- assets/db/           # Pre-populated SQLite (5.8 MB)
+|-- data_pipeline/       # Python scraping tools
+|-- android/             # Android config
+|-- pubspec.yaml
 ```
 
 ---
 
-## 🛠️ Tech Stack
-
-### Core Framework
-| Technology | Purpose |
-|------------|---------|
-| **Flutter 3.x** | Cross-platform UI framework |
-| **Dart 3.x** | Programming language |
-| **Material Design 3** | UI component library |
-
-### Database & Storage
-| Package | Purpose |
-|---------|---------|
-| `sqflite` | Local SQLite database |
-| `shared_preferences` | Key-value storage for settings |
-| `flutter_secure_storage` | Encrypted storage for sensitive data |
-| `path_provider` | File system access |
-
-### UI & Animations
-| Package | Purpose |
-|---------|---------|
-| `google_fonts` | Inter font family |
-| `shimmer` | Loading skeleton effects |
-| `flutter_staggered_animations` | List item animations |
-| `font_awesome_flutter` | Medical icons |
-
-### Features
-| Package | Purpose |
-|---------|---------|
-| `flutter_local_notifications` | Push notifications for reminders |
-| `share_plus` | Share/export functionality |
-| `file_picker` | Import/export files |
-| `url_launcher` | Open external links |
-| `permission_handler` | Runtime permissions |
-| `connectivity_plus` | Network status checking |
-| `dio` | HTTP client for future sync features |
-
----
-
-## 🎨 Design System
-
-### Light Theme
-| Element | Color | Hex |
-|---------|-------|-----|
-| Background | Warm White | `#FAFAF9` |
-| Surface | Soft Cream | `#FDFBF7` |
-| Primary | Teal Blue | `#0D9488` |
-| Secondary | Warm Gold | `#F59E0B` |
-| Text Heading | Deep Navy | `#1E3A5F` |
-| Text Body | Slate Grey | `#4B5563` |
-
-### Dark Theme
-| Element | Color | Hex |
-|---------|-------|-----|
-| Background | Rich Navy | `#0F172A` |
-| Surface | Slate | `#1E293B` |
-| Primary | Bright Teal | `#2DD4BF` |
-| Secondary | Bright Gold | `#FBBF24` |
-| Text Heading | Almost White | `#F8FAFC` |
-| Text Body | Light Slate | `#CBD5E1` |
-
-### Typography
-- **Font Family:** Inter (Google Fonts)
-- **Heading:** 28px Bold
-- **Title:** 20px Semi-Bold
-- **Body:** 14-16px Regular
-- **Labels:** 14px Medium
-
----
-
-## 🔮 Roadmap
-
-### Coming Soon
-- [ ] 🎙️ **Voice Search** – Search medicines using voice input
-- [ ] 📷 **Prescription Scanner (OCR)** – Scan prescriptions to find alternatives
-- [ ] 🔐 **Biometric Authentication** – Fingerprint/Face unlock
-- [ ] 🏥 **Pharmacy Locator** – Find nearby pharmacies with GPS
-- [ ] 📊 **Barcode Scanner** – Scan medicine barcodes for instant lookup
-
-### Future Plans
-- [ ] ☁️ **Cloud Sync** – Sync cabinet and reminders across devices
-- [ ] 💰 **Price Alerts** – Get notified when medicine prices drop
-- [ ] 📈 **Price History** – Track medicine price trends over time
-- [ ] 🏥 **Doctor Recommendations** – Suggested alternatives by specialists
-- [ ] 🌐 **Multi-language Support** – Bengali language option
-
----
-
-## 🚀 Getting Started for Developers
+## [?] Getting Started
 
 ### Prerequisites
-- Flutter SDK 3.10.4 or higher
-- Dart SDK 3.0 or higher
-- Android Studio / VS Code
+- Flutter SDK 3.10+
+- Dart SDK 3.0+
 - Android SDK (API 21+)
 
-### Environment Setup
+### Setup
 
 ```bash
-# Verify Flutter installation
-flutter doctor
-
-# Clone and setup
+# Clone
 git clone https://github.com/Shovon021/medicine-saver-bd.git
 cd medicine-saver-bd
 
-# Get dependencies
+# Install
 flutter pub get
 
-# Run the app
+# Run
 flutter run
-```
 
-### Data Pipeline (Python)
-
-The `data_pipeline/` directory contains Python scripts for:
-- Scraping medicine data from Medex.com.bd
-- Building and populating the SQLite database
-- Validating and verifying price data
-
-```bash
-cd data_pipeline
-
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run scraper
-python scrape_medex.py
-
-# Build database
-python build_db.py
+# Build Release
+flutter build apk --release
 ```
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👨‍💻 Author
-
-<div align="center">
+## [@] Author
 
 **Sarfaraz Ahamed Shovon**
 
-[![GitHub](https://img.shields.io/badge/GitHub-@Shovon021-181717?style=for-the-badge&logo=github)](https://github.com/Shovon021)
-
-</div>
+GitHub: [@Shovon021](https://github.com/Shovon021)
 
 ---
 
-## 🙏 Acknowledgments
+## [!] Disclaimer
 
-- Medicine data sourced from [Medex.com.bd](https://medex.com.bd)
-- Drug interaction data for safety features
-- Flutter team for the amazing framework
-- All Bangladeshi pharmaceutical companies included in the database
+> This app is for **informational purposes only**. Always consult a qualified healthcare professional before switching medications. The developers are not responsible for any health decisions made based on this app.
 
 ---
 
-## ⚠️ Disclaimer
+## [^] License
 
-> This app is for **informational purposes only**. Always consult a qualified healthcare professional or pharmacist before switching medications. The developers are not responsible for any health decisions made based on this app's information.
+MIT License - See [LICENSE](LICENSE) for details.
 
 ---
 
 <p align="center">
-  <strong>Made with ❤️ for Bangladesh</strong>
+  <strong>Made for Bangladesh</strong>
   <br>
   <sub>Helping citizens save money on essential medicines</sub>
 </p>

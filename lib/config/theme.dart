@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/theme_service.dart';
 
 /// App-wide color constants for the "Modern Clinical" design system.
 class AppColors {
@@ -7,10 +8,13 @@ class AppColors {
   static const Color background = Color(0xFFFAFAF9); // Warm White
   static const Color surface = Color(0xFFFDFBF7); // Soft Cream
 
-  // Primary - Medical Teal
-  static const Color primaryAccent = Color(0xFF0D9488); // Teal Blue
-  static const Color primaryLight = Color(0xFF5EEAD4); // Light Teal
-  static const Color primaryDark = Color(0xFF0F766E); // Dark Teal
+  // Primary - Dynamic from ThemeService
+  static Color get primaryAccent => ThemeService.instance.colors.primary;
+  static Color get primaryLight => ThemeService.instance.colors.primaryLight;
+  static Color get primaryDark => ThemeService.instance.colors.primaryDark;
+  
+  // Fallback constants for initialization before ThemeService is ready
+  static const Color defaultPrimary = Color(0xFF0D9488); // Teal Blue
 
   // Secondary & Status
   static const Color secondaryAccent = Color(0xFFF59E0B); // Warm Gold
@@ -49,7 +53,7 @@ class AppTheme {
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
       primaryColor: AppColors.primaryAccent,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: AppColors.primaryAccent,
         secondary: AppColors.secondaryAccent,
         surface: AppColors.surface,
@@ -115,7 +119,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primaryAccent, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primaryAccent, width: 1.5),
         ),
         hintStyle: GoogleFonts.inter(
           fontSize: 15,
@@ -221,7 +225,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColorsDark.primaryAccent, width: 1.5),
+          borderSide: BorderSide(color: AppColorsDark.primaryAccent, width: 1.5),
         ),
         hintStyle: GoogleFonts.inter(
           fontSize: 15,

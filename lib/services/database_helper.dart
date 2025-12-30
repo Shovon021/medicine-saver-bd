@@ -110,9 +110,11 @@ class DatabaseHelper {
   }
 
   /// Searches for brands by name OR generic name (supports partial matching).
+  /// Now supports both English and Bengali (বাংলা) search.
   Future<List<Brand>> searchBrands(String query) async {
     final db = await database;
     final String searchQuery = '%${query.toLowerCase()}%';
+    final String bengaliQuery = '%$query%'; // Bengali doesn't need lowercase
 
     final List<Map<String, dynamic>> results = await db.rawQuery('''
       SELECT 
@@ -123,10 +125,13 @@ class DatabaseHelper {
       FROM brands b
       LEFT JOIN generics g ON b.generic_id = g.id
       LEFT JOIN manufacturers m ON b.manufacturer_id = m.id
-      WHERE LOWER(b.name) LIKE ? OR LOWER(g.name) LIKE ?
+      WHERE LOWER(b.name) LIKE ? 
+         OR LOWER(g.name) LIKE ?
+         OR b.name_bn LIKE ?
+         OR g.name_bn LIKE ?
       ORDER BY b.price ASC
       LIMIT 50
-    ''', [searchQuery, searchQuery]);
+    ''', [searchQuery, searchQuery, bengaliQuery, bengaliQuery]);
 
     return results.map((map) => Brand.fromMap(map)).toList();
   }

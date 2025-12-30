@@ -13,22 +13,75 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
-  void _handleLogin() async {
+  bool _isSignUp = false; // Toggle between Sign In and Sign Up
+
+  void _handleAuth() async {
     if (_formKey.currentState!.validate()) {
-      final success = await AuthService.instance.signIn(
-        _emailController.text,
-        _passwordController.text,
-      );
+      String? error;
       
-      if (success) {
-        if (mounted) Navigator.pop(context);
+      if (_isSignUp) {
+        error = await AuthService.instance.signUp(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
       } else {
+        error = await AuthService.instance.signIn(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+      }
+
+      if (error == null) {
+        // Success
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid credentials')),
+            SnackBar(
+              content: Text(_isSignUp 
+                ? 'Account created! Check your email to confirm.' 
+                : 'Welcome back!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        // Error
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
+      }
+    }
+  }
+
+  void _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter your email first')),
+      );
+      return;
+    }
+
+    final error = await AuthService.instance.resetPassword(email);
+    if (error == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset email sent!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
       }
     }
   }
@@ -36,32 +89,38 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
+      appBar: AppBar(
+        title: Text(_isSignUp ? 'Create Account' : 'Sign In'),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 32),
+              
+              // Logo and Title
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/logo.jpg', height: 60),
+                  ClipOval(
+                    child: Image.asset('assets/logo.jpg', height: 60, width: 60, fit: BoxFit.cover),
+                  ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Medicine Saver',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              fontSize: 28,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primaryAccent,
                             ),
                       ),
                       Text(
-                        'Find affordable alternatives',
+                        'Sync your medicine cabinet',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: AppColors.textSubtle,
                             ),
@@ -70,31 +129,46 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
-              
+              const SizedBox(height: 48),
+
+              // Email Field
               TextFormField(
                 controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (v) => v!.contains('@') ? null : 'Enter valid email',
               ),
               const SizedBox(height: 16),
-              
+
+              // Password Field
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.key),
+                  prefixIcon: Icon(Icons.lock_outlined),
                 ),
-                validator: (v) => v!.length > 5 ? null : 'Min 6 chars',
+                validator: (v) => v!.length > 5 ? null : 'Min 6 characters',
               ),
-              const SizedBox(height: 24),
-              
+              const SizedBox(height: 8),
+
+              // Forgot Password (only for Sign In)
+              if (!_isSignUp)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _handleForgotPassword,
+                    child: const Text('Forgot Password?'),
+                  ),
+                ),
+              const SizedBox(height: 16),
+
+              // Submit Button
               ListenableBuilder(
                 listenable: AuthService.instance,
                 builder: (context, _) {
@@ -103,22 +177,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       : SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _handleLogin,
+                            onPressed: _handleAuth,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               backgroundColor: AppColors.primaryAccent,
                               foregroundColor: Colors.white,
                             ),
-                            child: const Text('Sign In'),
+                            child: Text(_isSignUp ? 'Create Account' : 'Sign In'),
                           ),
                         );
                 },
               ),
-              
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Create Account'),
+
+              const SizedBox(height: 24),
+
+              // Toggle Sign In / Sign Up
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _isSignUp ? 'Already have an account?' : "Don't have an account?",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _isSignUp = !_isSignUp),
+                    child: Text(
+                      _isSignUp ? 'Sign In' : 'Create Account',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryAccent,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

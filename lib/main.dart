@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/theme.dart';
 import 'screens/splash_screen.dart';
@@ -10,6 +11,12 @@ void main() async {
 
   // Allow Google Fonts to work even with network issues
   GoogleFonts.config.allowRuntimeFetching = true;
+  
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://qiyavsjgnuviptczudqa.supabase.co',
+    anonKey: 'sb_publishable_2321Q_x2UAoiDRQjyAL0Rg_6F4tiCpq',
+  );
   
   // Initialize theme service
   await ThemeService.instance.init();

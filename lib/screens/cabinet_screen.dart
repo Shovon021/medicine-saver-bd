@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/security_service.dart'; // RE-ENABLED with PIN-based security
 import '../services/backup_service.dart';
+import '../services/sync_service.dart';
 import '../services/cabinet_service.dart';
 import '../config/theme.dart';
 import '../widgets/medicine_card.dart';
@@ -124,6 +125,29 @@ class _CabinetScreenState extends State<CabinetScreen> {
             tooltip: 'Secure Vault Options',
             onSelected: (value) async {
               switch (value) {
+                case 'sync':
+                  setState(() => _isLoading = true);
+                  final result = await SyncService.instance.sync();
+                  if (!context.mounted) return;
+                  setState(() => _isLoading = false);
+                  
+                  if (result.success) {
+                    _loadMedicines();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${result.message} (↑${result.itemsPushed} ↓${result.itemsPulled})'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result.message),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  break;
                 case 'export':
                   await BackupService.instance.exportCabinet();
                   break;
@@ -144,6 +168,13 @@ class _CabinetScreenState extends State<CabinetScreen> {
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'sync',
+                child: ListTile(
+                  leading: Icon(Icons.cloud_sync),
+                  title: Text('Sync to Cloud'),
+                ),
+              ),
               const PopupMenuItem(
                 value: 'export',
                 child: ListTile(

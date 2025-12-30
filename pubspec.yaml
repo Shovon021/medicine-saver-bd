@@ -38,15 +38,16 @@ dependencies:
   
   # Advanced Features (Temporarily disabled for build)
   # speech_to_text: ^7.0.0          # Voice Search - DISABLED
-  # google_mlkit_text_recognition: ^0.14.0  # OCR - DISABLED (causes build failure)
-  # image_picker: ^1.1.2            # Camera for OCR - DISABLED
+  google_mlkit_text_recognition: ^0.14.0  # OCR - Re-enabled
+  image_picker: ^1.1.2            # Camera for OCR - Re-enabled
   permission_handler: ^11.3.1     # Runtime permissions
   shared_preferences: ^2.3.5      # Local storage for My Cabinet
   flutter_local_notifications: ^18.0.1  # Medicine Reminders
-  # timezone: ^0.10.0               # Timezone - DISABLED
+  timezone: ^0.10.0                 # Timezone for reminders
   
   # User Utility
   url_launcher: ^6.3.1            # Open external links (Google Maps)
+  supabase_flutter: ^2.12.0
   # geolocator: ^13.0.2             # GPS location - DISABLED for build
 
 dev_dependencies:

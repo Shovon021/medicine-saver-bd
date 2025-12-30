@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../services/auth_service.dart';
 import 'home_screen.dart';
+import 'welcome_screen.dart';
+import '../services/database_update_service.dart';
 
 /// Animated splash screen with logo
 class SplashScreen extends StatefulWidget {
@@ -36,22 +39,92 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to home after delay
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const HomeScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 500),
+    // Initialize auth and navigate
+    _initAndNavigate();
+  }
+
+
+
+  Future<void> _initAndNavigate() async {
+    // Initialize AuthService
+    await AuthService.instance.init();
+    
+    // Check for database updates (fire and forget check, but await if critical)
+    // We check in background, but show dialog if important update found
+    try {
+      final currentVersion = await DatabaseUpdateService.instance.getLocalVersion();
+      final newVersion = await DatabaseUpdateService.instance.checkForUpdate();
+      
+      if (newVersion != null && newVersion > currentVersion) {
+        if (!mounted) return;
+        
+        // Pause splash animation logic to show dialog
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('Update Available'),
+            content: Text('A new medicine database version ($newVersion) is available. Download now for accurate prices?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Later'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _performUpdate(newVersion);
+                },
+                child: const Text('Update Now'),
+              ),
+            ],
           ),
         );
       }
-    });
+    } catch (e) {
+      debugPrint('Auto-check update failed: $e');
+    }
+
+    // Wait for splash animation (ensure at least 2 seconds total passed)
+    // In real app, we might calculate remaining time, but simple delay is fine for now
+    
+    if (!mounted) return;
+
+    // Decide where to go
+    final isLoggedIn = AuthService.instance.isLoggedIn;
+    final isGuest = AuthService.instance.isGuest;
+    
+    Widget destination;
+    if (isLoggedIn || isGuest) {
+      destination = const HomeScreen();
+    } else {
+      destination = const WelcomeScreen();
+    }
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => destination,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  Future<void> _performUpdate(int newVersion) async {
+    // Show progress
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+
+    await DatabaseUpdateService.instance.downloadUpdate(newVersion);
+
+    if (!mounted) return;
+    Navigator.pop(context); // Close progress
   }
 
   @override
@@ -106,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen>
                             'assets/images/icon.jpg',
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
+                              return Icon(
                                 Icons.medical_services,
                                 size: 60,
                                 color: AppColors.primaryAccent,

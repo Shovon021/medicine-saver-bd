@@ -169,7 +169,7 @@ class MedicineCard extends StatelessWidget {
                           // Trusted Manufacturer Badge (#6)
                           if (_isTrustedManufacturer) ...[
                             const SizedBox(width: 4),
-                            const Icon(
+                            Icon(
                               Icons.verified,
                               size: 14,
                               color: AppColors.primaryAccent,

@@ -16,8 +16,9 @@ import 'health_tips_screen.dart';
 import 'theme_settings_screen.dart';
 import 'about_screen.dart';
 import 'developer_screen.dart';
+import 'scanner_screen.dart';
 import 'login_screen.dart';
-import '../services/auth_service.dart';
+// import '../services/auth_service.dart'; // Unused - REMOVED
 import '../services/database_helper.dart';
 import '../services/cabinet_service.dart';
 import '../models/models.dart';
@@ -61,9 +62,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Animation Controllers
   late AnimationController _logoAnimController;
   late AnimationController _statsAnimController;
-  late AnimationController _searchGlowController;
   late Animation<double> _logoPulseAnimation;
-  late Animation<double> _searchGlowAnimation;
   
   // Count-up values
   int _animatedMedicineCount = 0;
@@ -103,23 +102,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     
     _statsAnimController.forward();
-    
-    // Search Bar Glow Animation
-    _searchGlowController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat(reverse: true);
-    
-    _searchGlowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
-      CurvedAnimation(parent: _searchGlowController, curve: Curves.easeInOut),
-    );
   }
 
   @override
   void dispose() {
     _logoAnimController.dispose();
     _statsAnimController.dispose();
-    _searchGlowController.dispose();
     _searchController.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -317,100 +305,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _scanPrescription() async {
-    _showScanOptions();
-  }
-
-  void _showScanOptions() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Scan Prescription',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Take a photo or choose from gallery to extract medicine names',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSubtle,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildScanOption(
-                    icon: Icons.camera_alt_outlined,
-                    label: 'Camera',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      // DISABLED: Scanner feature removed
-                      // final result = await PrescriptionScannerService.instance.scanFromCamera();
-                      // _handleScanResult(result);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Scanner feature temporarily disabled')),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildScanOption(
-                    icon: Icons.photo_library_outlined,
-                    label: 'Gallery',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      // DISABLED: Scanner feature removed
-                      // final result = await PrescriptionScannerService.instance.scanFromGallery();
-                      // _handleScanResult(result);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Scanner feature temporarily disabled')),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+  void _scanPrescription() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ScannerScreen()),
     );
   }
 
-  Widget _buildScanOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: AppColors.primaryAccent),
-            const SizedBox(height: 8),
-            Text(label, style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   // _showScanBottomSheet and related methods
 
@@ -453,18 +355,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
-                        // Interaction Checker Button
+                        // Health Tips Button (Interactions moved to quick actions)
                         IconButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const InteractionCheckerScreen(),
+                                builder: (context) => const HealthTipsScreen(),
                               ),
                             );
                           },
-                          icon: const Icon(Icons.health_and_safety_outlined),
-                          tooltip: 'Drug Interaction Checker',
+                          icon: const Icon(Icons.lightbulb_outline),
+                          tooltip: 'Health Tips',
                         ),
                         // 3-Dot Menu
                         PopupMenuButton<String>(
@@ -474,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           itemBuilder: (context) => [
                             _buildMenuItem('profile', Icons.person_outline, 'Profile'),
                             _buildMenuItem('theme', Icons.palette_outlined, 'Theme'),
-                            _buildMenuItem('tips', Icons.lightbulb_outline, 'Health Tips'),
+                            _buildMenuItem('interactions', Icons.health_and_safety_outlined, 'Interactions'),
                             _buildMenuItem('reminders', Icons.notifications_outlined, 'Reminders'),
                             const PopupMenuDivider(),
                             _buildMenuItem('about', Icons.info_outline, 'About'),
@@ -652,16 +554,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             Icons.search_rounded,
                             color: AppColors.textSubtle,
                           ),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Clear button (only when text is present)
+                              if (_searchController.text.isNotEmpty)
+                                IconButton(
                                   icon: const Icon(Icons.clear_rounded),
                                   color: AppColors.textSubtle,
                                   onPressed: () {
                                     _searchController.clear();
                                     _onSearch('');
                                   },
-                                )
-                              : null,
+                                ),
+                              // Voice search button
+                              IconButton(
+                                icon: Icon(
+                                  _isListening ? Icons.stop : Icons.mic,
+                                  color: _isListening ? Colors.red : AppColors.primaryAccent,
+                                ),
+                                onPressed: _startVoiceSearch,
+                                tooltip: 'Voice search',
+                              ),
+                            ],
+                          ),
                           // Override defaults for glass effect
                           fillColor: Colors.transparent,
                           border: InputBorder.none,
@@ -816,7 +732,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const Icon(Icons.arrow_drop_down, color: AppColors.primaryAccent),
+                            Icon(Icons.arrow_drop_down, color: AppColors.primaryAccent),
                           ],
                         ),
                       ),
@@ -943,7 +859,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             _searchController.text = query;
                             _onSearch(query);
                           },
-                          avatar: const Icon(Icons.trending_up, size: 16, color: AppColors.primaryAccent),
+                          avatar: Icon(Icons.trending_up, size: 16, color: AppColors.primaryAccent),
                           backgroundColor: AppColors.primaryAccent.withValues(alpha: 0.1),
                         )).toList(),
                       ),
@@ -977,15 +893,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ],
-        ),
-      ),
-      // Voice Search FAB
-      floatingActionButton: FloatingActionButton(
-        onPressed: _startVoiceSearch,
-        backgroundColor: _isListening ? Colors.red : AppColors.primaryAccent,
-        child: Icon(
-          _isListening ? Icons.stop : Icons.mic,
-          color: Colors.white,
         ),
       ),
     );
@@ -1085,8 +992,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 'theme':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const ThemeSettingsScreen()));
         break;
-      case 'tips':
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const HealthTipsScreen()));
+      case 'interactions':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const InteractionCheckerScreen()));
         break;
       case 'reminders':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const ReminderScreen()));

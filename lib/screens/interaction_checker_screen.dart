@@ -14,6 +14,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
   final List<String> _selectedDrugs = [];
   final TextEditingController _drugController = TextEditingController();
   InteractionCheckResult? _result;
+  bool _isLoading = false;
 
   // Sample drug suggestions
   final List<String> _suggestions = [
@@ -40,7 +41,7 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
     });
   }
 
-  void _checkInteractions() {
+  Future<void> _checkInteractions() async {
     if (_selectedDrugs.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -51,9 +52,24 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
       return;
     }
 
-    setState(() {
-      _result = DrugInteractionService.instance.checkInteractions(_selectedDrugs);
-    });
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await DrugInteractionService.instance.checkInteractions(_selectedDrugs);
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error checking interactions: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -151,9 +167,15 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _checkInteractions,
-                  icon: const Icon(Icons.health_and_safety_outlined),
-                  label: const Text('Check Interactions'),
+                  onPressed: _isLoading ? null : _checkInteractions,
+                  icon: _isLoading 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.health_and_safety_outlined),
+                  label: Text(_isLoading ? 'Checking FDA Database...' : 'Check Interactions'),
                 ),
               ),
               const SizedBox(height: 24),
@@ -161,6 +183,18 @@ class _InteractionCheckerScreenState extends State<InteractionCheckerScreen> {
 
             // Results
             if (_result != null) _buildResults(),
+            
+            // Source indicator
+            if (_result != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Data source: ${_result!.source}',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: AppColors.textSubtle,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

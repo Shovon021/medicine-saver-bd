@@ -1,10 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
+import '../services/database_update_service.dart';
 
 /// Developer credits screen
-class DeveloperScreen extends StatelessWidget {
+class DeveloperScreen extends StatefulWidget {
   const DeveloperScreen({super.key});
+
+  @override
+  State<DeveloperScreen> createState() => _DeveloperScreenState();
+}
+
+class _DeveloperScreenState extends State<DeveloperScreen> {
+  bool _isChecking = false;
+
+  Future<void> _checkUpdate() async {
+    setState(() => _isChecking = true);
+
+    try {
+      final currentVersion = await DatabaseUpdateService.instance.getLocalVersion();
+      if (!mounted) return;
+      
+      final newVersion = await DatabaseUpdateService.instance.checkForUpdate();
+      
+      if (!mounted) return;
+      setState(() => _isChecking = false);
+
+      if (newVersion != null && newVersion > currentVersion) {
+        // Update available
+        _showUpdateDialog(newVersion);
+      } else {
+        // No update
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Database is up to date!')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isChecking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error checking updates: $e')),
+      );
+    }
+  }
+
+  Future<void> _showUpdateDialog(int newVersion) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Update Available'),
+        content: Text('A new medicine database version ($newVersion) is available. Download now?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Later'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              _performUpdate(newVersion);
+            },
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performUpdate(int newVersion) async {
+    setState(() => _isChecking = true);
+    
+    // Show progress dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final success = await DatabaseUpdateService.instance.downloadUpdate(newVersion);
+    
+    if (!mounted) return;
+    Navigator.pop(context); // Close progress dialog
+    setState(() => _isChecking = false);
+
+    if (success) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Success'),
+          content: const Text('Database updated successfully! Please restart the app to see changes.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Update failed. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +163,24 @@ class DeveloperScreen extends StatelessWidget {
                 color: AppColors.textSubtle,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
+
+            // Database Management Section (New)
+            _buildSectionTitle(context, 'Database Management'),
+            const SizedBox(height: 12),
+            _buildActionCard(
+              context,
+              icon: Icons.system_update,
+              title: 'Check for Updates',
+              subtitle: _isChecking ? 'Checking...' : 'Download latest medicine prices',
+              isLoading: _isChecking,
+              onTap: _isChecking ? () {} : _checkUpdate,
+            ),
+            const SizedBox(height: 32),
             
             // Contact Links
+            _buildSectionTitle(context, 'Contact Me'),
+            const SizedBox(height: 12),
             _buildContactCard(
               context,
               icon: Icons.email_outlined,
@@ -158,6 +272,54 @@ class DeveloperScreen extends StatelessWidget {
     );
   }
   
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primaryAccent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: isLoading 
+                ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryAccent))
+                : Icon(icon, color: AppColors.primaryAccent),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(subtitle, style: TextStyle(color: AppColors.textSubtle, fontSize: 13)),
+                ],
+              ),
+            ),
+            if (!isLoading)
+              Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSubtle),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildContactCard(
     BuildContext context, {
     required IconData icon,
@@ -207,7 +369,7 @@ class DeveloperScreen extends StatelessWidget {
       {'name': 'Flutter', 'icon': Icons.flutter_dash},
       {'name': 'Dart', 'icon': Icons.code},
       {'name': 'SQLite', 'icon': Icons.storage},
-      {'name': 'Python', 'icon': Icons.terminal},
+      {'name': 'Supabase', 'icon': Icons.cloud},
     ];
     
     return Container(

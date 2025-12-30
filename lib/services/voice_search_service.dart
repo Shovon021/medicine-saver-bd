@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Voice Search Service using Android's built-in speech recognition
@@ -18,10 +19,10 @@ class VoiceSearchService {
       final String? result = await _channel.invokeMethod('startVoiceRecognition');
       return result;
     } on PlatformException catch (e) {
-      print('Voice recognition error: ${e.message}');
+      debugPrint('Voice recognition error: ${e.message}');
       return null;
     } catch (e) {
-      print('Voice recognition failed: $e');
+      debugPrint('Voice recognition failed: $e');
       return null;
     }
   }

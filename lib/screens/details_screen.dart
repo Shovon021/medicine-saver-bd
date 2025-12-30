@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../config/theme.dart';
 import '../widgets/medicine_card.dart';
+import '../widgets/report_price_sheet.dart';
+import '../services/price_report_service.dart';
+import '../models/price_report.dart';
+import '../models/brand.dart';
+import '../services/auth_service.dart';
 
 /// Displays full details for a medicine, alternatives, and savings calculator.
-class DetailsScreen extends StatelessWidget {
+class DetailsScreen extends StatefulWidget {
   final String brandName;
   final String genericName;
   final String manufacturer;
@@ -16,7 +21,8 @@ class DetailsScreen extends StatelessWidget {
   final String? sideEffects;
   final bool isVerified;
   final DateTime? lastUpdated;
-  final String? heroTag; // Added for Hero Animation
+  final String? heroTag;
+  final int? brandId; // Added ID for reporting
 
   const DetailsScreen({
     super.key,
@@ -32,45 +38,107 @@ class DetailsScreen extends StatelessWidget {
     this.isVerified = true,
     this.lastUpdated,
     this.heroTag,
+    this.brandId,
   });
 
-  // Sample alternatives for UI demo
+  @override
+  State<DetailsScreen> createState() => _DetailsScreenState();
+}
+
+class _DetailsScreenState extends State<DetailsScreen> {
+  // Sample alternatives for UI demo (unchanged logic)
   List<Map<String, dynamic>> get _alternatives => [
-        {
-          'brandName': 'Esoral 20',
-          'genericName': genericName,
-          'manufacturer': 'Square Pharma',
-          'strength': strength,
-          'dosageForm': dosageForm,
-          'price': 6.00,
-          'isCheapest': true,
-        },
-        {
-          'brandName': 'Sergel 20',
-          'genericName': genericName,
-          'manufacturer': 'Healthcare Pharma',
-          'strength': strength,
-          'dosageForm': dosageForm,
-          'price': 7.50,
-          'isCheapest': false,
-        },
-        {
-          'brandName': 'Nexium 20',
-          'genericName': genericName,
-          'manufacturer': 'AstraZeneca',
-          'strength': strength,
-          'dosageForm': dosageForm,
-          'price': 25.00,
-          'isCheapest': false,
-        },
-      ];
+    {
+      'brandName': 'Esoral 20',
+      'genericName': widget.genericName,
+      'manufacturer': 'Square Pharma',
+      'strength': widget.strength,
+      'dosageForm': widget.dosageForm,
+      'price': 6.00,
+      'isCheapest': true,
+    },
+    {
+      'brandName': 'Sergel 20',
+      'genericName': widget.genericName,
+      'manufacturer': 'Healthcare Pharma',
+      'strength': widget.strength,
+      'dosageForm': widget.dosageForm,
+      'price': 7.50,
+      'isCheapest': false,
+    },
+    {
+      'brandName': 'Nexium 20',
+      'genericName': widget.genericName,
+      'manufacturer': 'AstraZeneca',
+      'strength': widget.strength,
+      'dosageForm': widget.dosageForm,
+      'price': 25.00,
+      'isCheapest': false,
+    },
+  ];
 
   double get _cheapestPrice =>
       _alternatives.map((e) => e['price'] as double).reduce((a, b) => a < b ? a : b);
 
   double get _savingsPercentage {
-    if (price <= _cheapestPrice) return 0;
-    return ((price - _cheapestPrice) / price * 100);
+    if (widget.price <= _cheapestPrice) return 0;
+    return ((widget.price - _cheapestPrice) / widget.price * 100);
+  }
+
+  // Reporting State
+  List<PriceReport> _reports = [];
+  bool _isLoadingReports = false;
+  double? _averageStreetPrice;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() => _isLoadingReports = true);
+    final reports = await PriceReportService.instance.getReportsForMedicine(widget.brandName);
+    final avgPrice = await PriceReportService.instance.getAveragePrice(widget.brandName);
+    
+    if (mounted) {
+      setState(() {
+        _reports = reports;
+        _averageStreetPrice = avgPrice;
+        _isLoadingReports = false;
+      });
+    }
+  }
+
+  void _showReportDialog(BuildContext context) async {
+    if (!AuthService.instance.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to report prices.')),
+      );
+      return;
+    }
+
+    final brand = Brand(
+        id: widget.brandId ?? 0,
+        name: widget.brandName,
+        genericId: 0, // Not needed for this context
+        manufacturerId: 0,
+        strength: widget.strength,
+        dosageForm: widget.dosageForm,
+        price: widget.price,
+        packSize: widget.packSize,
+    );
+
+    final bool? result = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ReportPriceSheet(brand: brand),
+    );
+
+    if (result == true) {
+      _loadReports(); // Refresh data
+    }
   }
 
   @override
@@ -80,7 +148,6 @@ class DetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Medicine Details'),
         actions: [
-          // Report Price Button
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.flag, size: 18),
             tooltip: 'Report Incorrect Price',
@@ -93,21 +160,21 @@ class DetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Card
             _buildHeaderCard(context),
             const SizedBox(height: 24),
 
-            // Savings Calculator
             if (_savingsPercentage > 0) ...[
               _buildSavingsCard(context),
               const SizedBox(height: 24),
             ],
 
-            // Medical Info Section
+            // NEW: Community Reports Section
+            _buildCommunitySection(context),
+            const SizedBox(height: 24),
+
             _buildInfoSection(context),
             const SizedBox(height: 24),
 
-            // Alternatives List
             Text(
               'Bio-Equivalent Alternatives',
               style: Theme.of(context).textTheme.titleMedium,
@@ -125,6 +192,137 @@ class DetailsScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showReportDialog(context),
+        icon: const Icon(Icons.add_circle_outline),
+        label: const Text('Report Price'),
+        backgroundColor: AppColors.primaryAccent,
+        foregroundColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildCommunitySection(BuildContext context) {
+    if (_isLoadingReports) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_reports.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const FaIcon(FontAwesomeIcons.users, color: Colors.blue),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('No community reports yet.', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text('Be the first to report the real street price!', style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Community Reports', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        if (_averageStreetPrice != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.success),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Average Street Price:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    '৳${_averageStreetPrice!.toStringAsFixed(2)}', 
+                    style: TextStyle(
+                      color: AppColors.success, 
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _reports.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final report = _reports[index];
+            final savings = widget.price - report.pricePaid;
+            
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(color: Colors.black12, blurRadius: 2, offset: const Offset(0, 1)),
+                ],
+              ),
+              child: Row(
+                children: [
+                   Container(
+                     padding: const EdgeInsets.all(8),
+                     decoration: const BoxDecoration(color: Colors.black12, shape: BoxShape.circle),
+                     child: const FaIcon(FontAwesomeIcons.user, size: 12, color: Colors.white),
+                   ),
+                   const SizedBox(width: 12),
+                   Expanded(
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         Text(
+                           'Paid ৳${report.pricePaid.toStringAsFixed(2)}',
+                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                         ),
+                         Text(
+                           '${report.pharmacyName?.isNotEmpty == true ? report.pharmacyName : 'Pharmacy'} • ${report.locationArea?.isNotEmpty == true ? report.locationArea : 'Unknown Area'}',
+                           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                         ),
+                       ],
+                     ),
+                   ),
+                   if (savings > 0)
+                     Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                       decoration: BoxDecoration(
+                         color: Colors.green.withValues(alpha: 0.2),
+                         borderRadius: BorderRadius.circular(4),
+                       ),
+                       child: Text(
+                         'Saved ৳${savings.toStringAsFixed(0)}',
+                         style: const TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold),
+                       ),
+                     ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -149,13 +347,13 @@ class DetailsScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: heroTag != null
+                child: widget.heroTag != null
                     ? Hero(
-                        tag: heroTag!,
+                        tag: widget.heroTag!,
                         child: Material(
                           color: Colors.transparent,
                           child: Text(
-                            brandName,
+                            widget.brandName,
                             style: Theme.of(context).textTheme.displayLarge?.copyWith(
                                   fontSize: 24,
                                 ),
@@ -163,13 +361,13 @@ class DetailsScreen extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        brandName,
+                        widget.brandName,
                         style: Theme.of(context).textTheme.displayLarge?.copyWith(
                               fontSize: 24,
                             ),
                       ),
               ),
-              if (isVerified)
+              if (widget.isVerified)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
@@ -207,7 +405,7 @@ class DetailsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              genericName,
+              widget.genericName,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppColors.primaryAccent,
                     fontWeight: FontWeight.w600,
@@ -219,18 +417,18 @@ class DetailsScreen extends StatelessWidget {
           // Details Grid
           Row(
             children: [
-              _buildInfoChip(context, FontAwesomeIcons.building, manufacturer),
+              _buildInfoChip(context, FontAwesomeIcons.building, widget.manufacturer),
               const SizedBox(width: 12),
-              _buildInfoChip(context, FontAwesomeIcons.ruler, strength),
+              _buildInfoChip(context, FontAwesomeIcons.ruler, widget.strength),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildInfoChip(context, FontAwesomeIcons.tablets, dosageForm),
-              if (packSize != null) ...[
+              _buildInfoChip(context, FontAwesomeIcons.tablets, widget.dosageForm),
+              if (widget.packSize != null) ...[
                 const SizedBox(width: 12),
-                _buildInfoChip(context, FontAwesomeIcons.boxOpen, packSize!),
+                _buildInfoChip(context, FontAwesomeIcons.boxOpen, widget.packSize!),
               ],
             ],
           ),
@@ -245,7 +443,7 @@ class DetailsScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(
-                '৳${price.toStringAsFixed(2)}',
+                '৳${widget.price.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: AppColors.textHeading,
                       fontWeight: FontWeight.bold,
@@ -255,10 +453,10 @@ class DetailsScreen extends StatelessWidget {
           ),
 
           // Last Updated
-          if (lastUpdated != null) ...[
+          if (widget.lastUpdated != null) ...[
             const SizedBox(height: 8),
             Text(
-              'Price updated: ${_formatDate(lastUpdated!)}',
+              'Price updated: ${_formatDate(widget.lastUpdated!)}',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     fontSize: 11,
                     color: AppColors.textSubtle,
@@ -357,19 +555,19 @@ class DetailsScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (indication != null && indication!.isNotEmpty) ...[
+        if (widget.indication != null && widget.indication!.isNotEmpty) ...[
           Text(
             'Indication',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            indication!,
+            widget.indication!,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),
         ],
-        if (sideEffects != null && sideEffects!.isNotEmpty) ...[
+        if (widget.sideEffects != null && widget.sideEffects!.isNotEmpty) ...[
           Text(
             'Side Effects',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -391,7 +589,7 @@ class DetailsScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    sideEffects!,
+                    widget.sideEffects!,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
@@ -400,76 +598,6 @@ class DetailsScreen extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-
-  void _showReportDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Report Incorrect Price',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Help us keep prices accurate. If you\'ve seen a different price in the market, let us know.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSubtle,
-                  ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Correct Price (৳)',
-                hintText: 'e.g., 8.50',
-                prefixIcon: const FaIcon(FontAwesomeIcons.moneyBillWave, size: 18),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Additional Notes (Optional)',
-                hintText: 'Where did you see this price?',
-                prefixIcon: const FaIcon(FontAwesomeIcons.noteSticky, size: 18),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Thank you! Your report has been submitted.'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-                child: const Text('Submit Report'),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
     );
   }
 

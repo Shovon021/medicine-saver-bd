@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -58,7 +59,10 @@ class ReminderService {
     final android = _notifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (android != null) {
+      // Request notification permission (Android 13+)
       await android.requestNotificationsPermission();
+      // Request exact alarm permission (Android 12+)
+      await android.requestExactAlarmsPermission();
     }
   }
 
@@ -74,25 +78,35 @@ class ReminderService {
     required List<int> daysOfWeek, // 1=Monday, 7=Sunday
     String? notes,
   }) async {
-    final reminder = MedicineReminder(
-      id: DateTime.now().millisecondsSinceEpoch,
-      medicineName: medicineName,
-      dosage: dosage,
-      hour: time.hour,
-      minute: time.minute,
-      daysOfWeek: daysOfWeek,
-      notes: notes,
-      isActive: true,
-    );
+    try {
+      final reminder = MedicineReminder(
+        id: DateTime.now().millisecondsSinceEpoch,
+        medicineName: medicineName,
+        dosage: dosage,
+        hour: time.hour,
+        minute: time.minute,
+        daysOfWeek: daysOfWeek,
+        notes: notes,
+        isActive: true,
+      );
 
-    // Schedule notifications for each day
-    for (final day in daysOfWeek) {
-      await _scheduleWeeklyNotification(reminder, day);
+      // Schedule notifications for each day
+      for (final day in daysOfWeek) {
+        try {
+          await _scheduleWeeklyNotification(reminder, day);
+        } catch (e) {
+          // Continue even if one day fails
+          debugPrint('Failed to schedule notification for day $day: $e');
+        }
+      }
+
+      _reminders.add(reminder);
+      await _saveReminders();
+      return reminder;
+    } catch (e) {
+      debugPrint('Error scheduling reminder: $e');
+      return null;
     }
-
-    _reminders.add(reminder);
-    await _saveReminders();
-    return reminder;
   }
 
   /// Schedule a weekly notification for a specific day.

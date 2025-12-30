@@ -90,7 +90,7 @@ class AuthService extends ChangeNotifier {
       // This opens a web view for Google Sign-In
       final success = await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.supabase.medicinesaver://login-callback/',
+        redirectTo: 'io.supabase.flutter://login-callback/',
       );
 
       if (!success) {

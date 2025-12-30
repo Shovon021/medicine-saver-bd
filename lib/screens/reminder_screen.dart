@@ -147,20 +147,27 @@ class _ReminderScreenState extends State<ReminderScreen> {
                       return;
                     }
 
-                    await ReminderService.instance.scheduleReminder(
+                    final result = await ReminderService.instance.scheduleReminder(
                       medicineName: medicineController.text,
                       dosage: dosageController.text.isEmpty ? '1 dose' : dosageController.text,
                       time: ReminderTime(hour: selectedTime.hour, minute: selectedTime.minute),
                       daysOfWeek: selectedDays,
                     );
 
-                    await _loadReminders();
                     if (!context.mounted) return;
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Reminder set successfully!')),
-                    );
                     Navigator.pop(context);
+                    
+                    if (result != null) {
+                      await _loadReminders();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Reminder set successfully!')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to set reminder. Please try again.')),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.alarm_add),
                   label: const Text('Set Reminder'),

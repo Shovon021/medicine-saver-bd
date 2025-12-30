@@ -51,8 +51,10 @@ class PrescriptionScannerService {
   }
 
   bool _isNoise(String text) {
-    final noise = ['tablet', 'capsule', 'daily', 'mg', 'ml', 'date', 'price', 'tk', 'qty'];
-    return noise.any((n) => text.toLowerCase().contains(n));
+    final lowerText = text.toLowerCase().trim();
+    // Only filter if the ENTIRE text is just noise (not if it contains these as part of medicine name)
+    final exactNoise = ['rx', 'date', 'price', 'tk', 'qty', 'total', 'dr', 'doctor', 'patient', 'name', 'age', 'sig'];
+    return exactNoise.contains(lowerText) || lowerText.length < 3;
   }
 
   void dispose() {

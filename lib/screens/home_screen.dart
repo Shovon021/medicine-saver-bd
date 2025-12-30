@@ -17,7 +17,7 @@ import 'theme_settings_screen.dart';
 import 'about_screen.dart';
 import 'developer_screen.dart';
 import 'scanner_screen.dart';
-import 'login_screen.dart';
+import 'profile_screen.dart';
 // import '../services/auth_service.dart'; // Unused - REMOVED
 import '../services/database_helper.dart';
 import '../services/cabinet_service.dart';
@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isLoading = false;
   String? _currentGenericName;
   int _savingsPercent = 0;
+  Brand? _exactMatch; // The medicine that matched the search query exactly
   
   // Strength filter
   List<String> _availableStrengths = [];
@@ -156,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _searchResults = [];
         _currentGenericName = null;
         _savingsPercent = 0;
+        _exactMatch = null;
       });
       return;
     }
@@ -168,6 +170,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     try {
       // Use smart search to get ALL alternatives by generic
       final results = await DatabaseHelper.instance.searchWithAlternatives(query);
+      
+      // Find the exact match (case-insensitive name match)
+      Brand? exactMatch;
+      final queryLower = query.toLowerCase().trim();
+      for (final brand in results) {
+        if (brand.name.toLowerCase() == queryLower || 
+            brand.name.toLowerCase().startsWith(queryLower)) {
+          exactMatch = brand;
+          break;
+        }
+      }
       
       // Calculate savings if we have results with prices
       int savings = 0;
@@ -191,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _selectedCategory = null; // Reset category filter
         _currentGenericName = genericName;
         _savingsPercent = savings;
+        _exactMatch = exactMatch;
         _isLoading = false;
       });
       
@@ -593,17 +607,91 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
             // Results Section with Staggered Animation
             if (_isSearching) ...[
+              // "You searched for" card - shows the exact match with price
+              if (_exactMatch != null && !_isLoading)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primaryAccent.withValues(alpha: 0.1),
+                            AppColors.primaryAccent.withValues(alpha: 0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'You searched for',
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: AppColors.textSubtle,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _exactMatch!.name,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textHeading,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${_exactMatch!.manufacturerName ?? "Unknown"} • ${_exactMatch!.strength ?? ""}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSubtle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Price
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '৳${_exactMatch!.price?.toStringAsFixed(2) ?? "N/A"}',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primaryAccent,
+                                ),
+                              ),
+                              Text(
+                                'per unit',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: AppColors.textSubtle,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
                         child: Text(
-                          _currentGenericName != null 
-                              ? 'Alternatives for $_currentGenericName'
-                              : 'Alternatives Found',
+                          _exactMatch != null 
+                              ? 'Cheaper Alternatives'
+                              : (_currentGenericName != null 
+                                  ? 'Alternatives for $_currentGenericName'
+                                  : 'Alternatives Found'),
                           style: Theme.of(context).textTheme.titleMedium,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -987,7 +1075,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _handleMenuAction(BuildContext context, String value) {
     switch (value) {
       case 'profile':
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
         break;
       case 'theme':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const ThemeSettingsScreen()));

@@ -103,42 +103,21 @@ class MedicineCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Brand Name + Badge
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Hero(
-                              tag: '${brandName}_$strength',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  brandName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
+                      // Brand Name
+                      Hero(
+                        tag: '${brandName}_$strength',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            brandName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          if (isCheapest) ...[
-                            const SizedBox(width: 8),
-                            _PulseBadge(
-                              child: Text(
-                                'Best Price',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      color: AppColors.success,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 4),
                       // Generic Name

@@ -22,6 +22,7 @@ import 'profile_screen.dart';
 import '../services/database_helper.dart';
 import '../services/cabinet_service.dart';
 import '../models/models.dart';
+import 'details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -613,7 +614,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -624,57 +624,84 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.3)),
                       ),
-                      child: Row(
-                        children: [
-                          // Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailsScreen(
+                                  brandId: _exactMatch!.id,
+                                  brandName: _exactMatch!.name,
+                                  genericName: _exactMatch!.genericName ?? 'Unknown',
+                                  manufacturer: _exactMatch!.manufacturerName ?? 'Unknown',
+                                  strength: _exactMatch!.strength ?? '',
+                                  dosageForm: _exactMatch!.dosageForm ?? '',
+                                  price: _exactMatch!.price ?? 0.0,
+                                  packSize: _exactMatch!.packSize,
+                                  isVerified: _exactMatch!.verified,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
                               children: [
-                                Text(
-                                  'You searched for',
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                    color: AppColors.textSubtle,
+                                // Info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'You searched for',
+                                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                          color: AppColors.textSubtle,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _exactMatch!.name,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textHeading,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${_exactMatch!.manufacturerName ?? "Unknown"} • ${_exactMatch!.strength ?? ""}',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: AppColors.textSubtle,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _exactMatch!.name,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textHeading,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${_exactMatch!.manufacturerName ?? "Unknown"} • ${_exactMatch!.strength ?? ""}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSubtle,
-                                  ),
+                                // Price
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '৳${_exactMatch!.price?.toStringAsFixed(2) ?? "N/A"}',
+                                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primaryAccent,
+                                      ),
+                                    ),
+                                    Text(
+                                      'per unit',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AppColors.textSubtle,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          // Price
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '৳${_exactMatch!.price?.toStringAsFixed(2) ?? "N/A"}',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryAccent,
-                                ),
-                              ),
-                              Text(
-                                'per unit',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.textSubtle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

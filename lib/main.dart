@@ -12,10 +12,13 @@ void main() async {
   // Allow Google Fonts to work even with network issues
   GoogleFonts.config.allowRuntimeFetching = true;
   
-  // Initialize Supabase
+  // Initialize Supabase with deep link support for OAuth
   await Supabase.initialize(
     url: 'https://qiyavsjgnuviptczudqa.supabase.co',
     anonKey: 'sb_publishable_2321Q_x2UAoiDRQjyAL0Rg_6F4tiCpq',
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
   
   // Initialize theme service

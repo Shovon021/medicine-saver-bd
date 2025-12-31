@@ -357,8 +357,22 @@ class _ReminderScreenState extends State<ReminderScreen> {
               Switch(
                 value: reminder.isActive,
                 onChanged: (value) async {
-                  await ReminderService.instance.toggleReminder(reminder.id);
-                  await _loadReminders();
+                  final error = await ReminderService.instance.toggleReminder(reminder.id);
+                  if (error == null) {
+                    await _loadReminders();
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(value ? 'Reminder enabled' : 'Reminder disabled'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  } else {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed: $error')),
+                    );
+                  }
                 },
               ),
               IconButton(
@@ -385,8 +399,19 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   );
 
                   if (confirmed == true) {
-                    await ReminderService.instance.cancelReminder(reminder.id);
-                    await _loadReminders();
+                    final success = await ReminderService.instance.cancelReminder(reminder.id);
+                    if (success) {
+                      await _loadReminders();
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Reminder deleted')),
+                      );
+                    } else {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Failed to delete reminder')),
+                      );
+                    }
                   }
                 },
               ),
